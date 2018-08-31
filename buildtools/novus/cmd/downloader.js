@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 var mod_fs = require('fs');
@@ -254,12 +254,23 @@ bit_enum_zone(be, next) {
 		return;
 
 	case 'bits-dir':
+	case 'mbits-dir':
+		var bits_from_dir = null;
+		// We implement very slightly different behaviour between bits-dir and
+		// mbits-dir, the former uses an MG-style directory layout, the latter
+		// uses Manta-style directory layout.
+		if (source == "mbits-dir") {
+			bits_from_dir = mod_path.join(
+				process.env.BITS_DIR, jobname, branch + "-latest", jobname);
+		} else {
+			bits_from_dir = mod_path.join(process.env.BITS_DIR, jobname);
+		}
+
 		mod_assert.string(process.env.BITS_DIR, '$BITS_DIR');
 
 		bits = [];
 		lib_bits_from_dir(bits, {
-			bfd_dir: mod_path.join(process.env.BITS_DIR,
-			    jobname),
+			bfd_dir: bits_from_dir,
 			bfd_prefix: 'zone.' + name,
 			bfd_jobname: jobname,
 			bfd_branch: branch,
@@ -353,11 +364,22 @@ bit_enum_file(be, next)
 		return;
 
 	case 'bits-dir':
+	case 'mbits-dir':
 		mod_assert.string(process.env.BITS_DIR, '$BITS_DIR');
 
+		var bits_from_dir = null;
+		// We implement very slightly different behaviour between bits-dir and
+		// mbits-dir, the former uses an MG-style directory layout, the latter
+		// uses Manta-style directory layout.
+		if (source == "mbits-dir") {
+			bits_from_dir = mod_path.join(
+				process.env.BITS_DIR, jobname, branch + "-latest", jobname);
+		} else {
+			bits_from_dir = mod_path.join(process.env.BITS_DIR, jobname);
+		}
+
 		lib_bits_from_dir(be.be_out, {
-			bfd_dir: mod_path.join(process.env.BITS_DIR,
-			    jobname),
+			bfd_dir: bits_from_dir,
 			bfd_prefix: 'file.' + name,
 			bfd_jobname: jobname,
 			bfd_branch: branch,
