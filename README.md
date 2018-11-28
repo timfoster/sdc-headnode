@@ -185,6 +185,12 @@ zone or via the `"override-all-sources"` top-level key, the `BITS_DIR`
 environment variable must contain the path of a MG-style bits directory.  See
 the source and documentation for [Mountain Gorilla][mg] for more details.
 
+An alternate local directory layout is also supported and can be used by
+setting the `"override-all-sources"` key to the value `"mbits-dir"`. This
+layout matches the layout of the manta directory structure, rather than the
+one created by Mountain Gorilla. As above, the `BITS_DIR` environment variable
+points to the local directory containing these images.
+
 All of the above definitions will cause the download phase of the build to
 store a local copy of the zone dataset stream and manifest in the `cache/`
 directory, using the original filename of the image, e.g. for `manatee`:
