@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright 2017 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 ROOT=$(cd $(dirname $0)/../; pwd)
@@ -374,7 +374,7 @@ function create_output
         (cd $STAGE \
             && mv USB-headnode.vmwarevm \
             coal-${THIS_BUILDSTAMP}-${USB_SIZE}.vmwarevm \
-            && ${TAR} -zcf ${ROOT}/coal-${THIS_BUILDSTAMP}-${USB_SIZE}.tgz \
+            && ${TAR} -I pigz -cf ${ROOT}/coal-${THIS_BUILDSTAMP}-${USB_SIZE}.tgz \
             root.password.${LIVEIMG_VERSION} \
             coal-${THIS_BUILDSTAMP}-${USB_SIZE}.vmwarevm *.manifest)
         [[ $? -eq 0 ]] || fatal "Unable to create .tgz image."

@@ -6,12 +6,13 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright (c) 2019, Joyent, Inc.
 #
 
 PLATFORM=$(uname -s)
 MNT_DIR="${ROOT}/mnt"
 GZCAT="zcat"
+TAR_COMPRESSION_ARG="-z"
 [ -z "$IMG_TYPE" ] && IMG_TYPE="usb"
 case "$PLATFORM" in
   Darwin)
@@ -38,6 +39,9 @@ case "$PLATFORM" in
     TAR_ROOT="--owner=root --group=root"
     unset MACHINE_THAT_GOES_PING
     PING="/usr/sbin/ping"
+    if [[ -f /opt/local/bin/pigz ]]; then
+        TAR_COMPRESSION_ARG="-I /opt/local/bin/pigz"
+    fi
     ;;
   *)
     echo "Platform $PLATFORM not supported."
@@ -115,7 +119,8 @@ function create_output
     else
         echo "==> Creating boot-${THIS_BUILDSTAMP}.tgz"
         ${SUCMD} chown -R ${USER} ${MNT_DIR}
-        ${TAR} $TAR_HARD_DEREF -zchf ${ROOT}/boot-${THIS_BUILDSTAMP}.tgz \
+        ${TAR} $TAR_HARD_DEREF ${TAR_COMPRESSION_ARG} \
+            -chf ${ROOT}/boot-${THIS_BUILDSTAMP}.tgz \
             -C ${MNT_DIR} .
     fi
     rm -rf $MNT_DIR || true

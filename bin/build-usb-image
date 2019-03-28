@@ -267,7 +267,7 @@ function create_output
         (cd $STAGE \
             && mv $IMG_TMP_DIR/$$.${OUTPUT_IMG} \
             usb-${THIS_BUILDSTAMP}-${OUTPUT_IMG} \
-            && ${TAR} -zcf ${ROOT}/usb-${THIS_BUILDSTAMP}.tgz \
+            && ${TAR} -I pigz -cf ${ROOT}/usb-${THIS_BUILDSTAMP}.tgz \
             root.password.${LIVEIMG_VERSION} \
             usb-${THIS_BUILDSTAMP}-${OUTPUT_IMG} *.manifest)
         [[ $? -eq 0 ]] || fatal "Unable to create .tgz image."
