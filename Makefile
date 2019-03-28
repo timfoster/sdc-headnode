@@ -199,8 +199,9 @@ TOOLS_DEPS = \
 #
 # Included definitions
 #
-include ./buildtools/mk/Makefile.defs
-
+ENGBLD_REQUIRE          := $(shell git submodule update --init deps/eng)
+include ./deps/eng/tools/mk/Makefile.defs
+TOP ?= $(error Unable to access eng.git submodule Makefiles.)
 
 #
 # usb-headnode-specific targets
@@ -208,6 +209,9 @@ include ./buildtools/mk/Makefile.defs
 
 .PHONY: all
 all: coal
+
+check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
+    $(EXTRA_CHECK_TARGETS)
 
 0-npm-stamp: package.json
 	npm install
@@ -418,5 +422,5 @@ $(SDC_ZONE_MAN_LINKS):
 # Includes
 #
 
-include ./buildtools/mk/Makefile.deps
-include ./buildtools/mk/Makefile.targ
+include ./deps/eng/tools/mk/Makefile.deps
+include ./deps/eng/tools/mk/Makefile.targ
