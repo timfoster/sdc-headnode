@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright 2016 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -23,6 +23,12 @@ elif [[ $(uname) = "SunOS" ]]; then
 	# We must specify gtar, otherwise we will use the tar that ships
 	# with illumos.
 	TAR="gtar"
+	if [[ -z "$TAR_COMPRESSION" ]]; then
+		TAR_COMPRESSION=pigz
+	fi
 else
 	TAR="tar"
+	if [[ -z "$TAR_COMPRESSION" ]]; then
+		TAR_COMPRESSION=gzip
+	fi
 fi

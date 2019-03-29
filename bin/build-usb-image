@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright 2017 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 ROOT=$(cd $(dirname $0)/../; pwd)
@@ -267,7 +267,8 @@ function create_output
         (cd $STAGE \
             && mv $IMG_TMP_DIR/$$.${OUTPUT_IMG} \
             usb-${THIS_BUILDSTAMP}-${OUTPUT_IMG} \
-            && ${TAR} -I pigz -cf ${ROOT}/usb-${THIS_BUILDSTAMP}.tgz \
+            && ${TAR} -I ${TAR_COMPRESSION} \
+                -cf ${ROOT}/usb-${THIS_BUILDSTAMP}.tgz \
             root.password.${LIVEIMG_VERSION} \
             usb-${THIS_BUILDSTAMP}-${OUTPUT_IMG} *.manifest)
         [[ $? -eq 0 ]] || fatal "Unable to create .tgz image."

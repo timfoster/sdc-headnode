@@ -12,7 +12,9 @@
 PLATFORM=$(uname -s)
 MNT_DIR="${ROOT}/mnt"
 GZCAT="zcat"
-TAR_COMPRESSION_ARG="-z"
+if [[ -z "$TAR_COMPRESSION" ]]; then
+    TAR_COMPRESSION=gzip
+fi
 [ -z "$IMG_TYPE" ] && IMG_TYPE="usb"
 case "$PLATFORM" in
   Darwin)
@@ -39,8 +41,8 @@ case "$PLATFORM" in
     TAR_ROOT="--owner=root --group=root"
     unset MACHINE_THAT_GOES_PING
     PING="/usr/sbin/ping"
-    if [[ -f /opt/local/bin/pigz ]]; then
-        TAR_COMPRESSION_ARG="-I /opt/local/bin/pigz"
+    if [[ -z "$TAR_COMPRESSION" ]]; then
+        TAR_COMPRESSION=pigz
     fi
     ;;
   *)
@@ -119,7 +121,7 @@ function create_output
     else
         echo "==> Creating boot-${THIS_BUILDSTAMP}.tgz"
         ${SUCMD} chown -R ${USER} ${MNT_DIR}
-        ${TAR} $TAR_HARD_DEREF ${TAR_COMPRESSION_ARG} \
+        ${TAR} $TAR_HARD_DEREF -I ${TAR_COMPRESSION} \
             -chf ${ROOT}/boot-${THIS_BUILDSTAMP}.tgz \
             -C ${MNT_DIR} .
     fi
