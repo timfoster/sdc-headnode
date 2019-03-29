@@ -6,10 +6,45 @@
 #
 
 #
-# Copyright (c) 2018 Joyent, Inc.
+# Copyright (c) 2019 Joyent, Inc.
 #
 
 PERCENT := %
+
+#
+# The headnode build the following variants, declared by the $(HEADNODE_VARIANT)
+# variable:
+# 'debug'           use a debug platform image
+# 'joyent'          include specific firmware for Joyent deployments
+# 'joyent-debug'    a combination of the above
+#
+ifdef HEADNODE_VARIANT
+    HEADNODE_VARIANT_SUFFIX=-$(HEADNODE_VARIANT)
+endif
+
+NAME = headnode$(HEADNODE_VARIANT_SUFFIX)
+# XXX timf: while testing, we want this only going to /stor/timf-builds
+# remove the following line before integration.
+ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
+
+ifeq ($(HEADNODE_VARIANT), debug)
+    DEBUG_BUILD=true
+endif
+
+ifeq ($(HEADNODE_VARIANT), joyent)
+    JOYENT_BUILD=true
+    # XXX timf: this is internal, so before integration,
+    # this should change to /stor/builds
+    ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
+endif
+
+ifeq ($(HEADNODE_VARIANT), joyent-debug)
+    JOYENT_BUILD=true
+    DEBUG_BUILD=true
+    # XXX timf: this is internal, so before integration,
+    # this should change to /stor/builds
+    ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
+endif
 
 #
 # Files
@@ -212,7 +247,7 @@ TOP ?= $(error Unable to access eng.git submodule Makefiles.)
 #
 
 .PHONY: all
-all: coal
+all: coal gz-tools
 
 check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
     $(EXTRA_CHECK_TARGETS)
@@ -221,22 +256,35 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 	npm install
 	touch $@
 
+#
+# If a specific build.spec.local file does not exist, create a default
+# using the $(BRANCH) likely passed to us from jenkins denoting the branch
+# of smartos-live we're using. As eng.git already converts that into a
+# short-form branch name, we don't need to worry about long form branch names
+# e.g. refs/remotes/origin/master
+#
+.PHONY: build-spec-local
+build-spec-local:
+	if [ ! -f build.spec.local ]; then \
+	    echo "{\"bits-branch\": \"$(BRANCH)\"}" > build.spec.local; \
+	fi
+
 CLEAN_FILES += 0-npm-stamp
 
 .PHONY: deps
-deps: 0-npm-stamp
+deps: 0-npm-stamp build-spec-local
 
 .PHONY: coal
 coal: deps download $(TOOLS_DEPS)
-	bin/build-image coal
+	TIMESTAMP=$(TIMESTAMP) bin/build-image coal
 
 .PHONY: usb
 usb: deps download $(TOOLS_DEPS)
-	bin/build-image usb
+	TIMESTAMP=$(TIMESTAMP) bin/build-image usb
 
 .PHONY: boot
 boot: deps download $(TOOLS_DEPS)
-	bin/build-image tar
+	TIMESTAMP=$(TIMESTAMP) bin/build-image tar
 
 .PHONY: tar
 tar: boot
@@ -297,18 +345,7 @@ gz-tools: $(TOOLS_DEPS)
 		> $(TOP)/$(GZ_TOOLS_MANIFEST)
 	rm -rf build/$(GZ_TOOLS_STAMP)
 
-CLEAN_FILES += build/gz-tools
-
-.PHONY: gz-tools-publish
-gz-tools-publish: gz-tools
-	@if [[ -z "$(BITS_DIR)" ]]; then \
-		@echo "error: 'BITS_DIR' must be set for 'gz-tools-publish' target"; \
-		exit 1; \
-	fi
-	mkdir -p $(BITS_DIR)/gz-tools
-	cp $(TOP)/$(GZ_TOOLS_TARBALL) $(BITS_DIR)/gz-tools/$(GZ_TOOLS_TARBALL)
-	cp $(TOP)/$(GZ_TOOLS_MANIFEST) $(BITS_DIR)/gz-tools/$(GZ_TOOLS_MANIFEST)
-
+CLEAN_FILES += build/gz-tools *.tgz $(GZ_TOOLS_MANIFEST) release.json
 
 #
 # Tools tarball
@@ -420,7 +457,30 @@ $(SDC_ZONE_MAN_LINKS):
 	rm -f $@
 	ln -s ../../sdc/man/man1/$(@F) $@
 
+#
+# Artifact publication, typically used for Jenkins builds.
+#
+.PHONY: release-json
+release-json:
+	echo "{ \
+	   \"date\": \"$(TIMESTAMP)\", \
+	   \"branch\": \"$(BRANCH)\", \
+	   \"coal\": \"coal$(HEADNODE_VARIANT_SUFFIX)-$(STAMP)-4g.tgz\", \
+	   \"boot\": \"boot$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz\", \
+	   \"usb\": \"usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz\" \
+	}" | json > release.json
 
+
+.PHONY: publish
+publish: release-json
+	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
+	mv $(GZ_TOOLS_MANIFEST) $(ENGBLD_BITS_DIR)/$(NAME)
+	mv $(GZ_TOOLS_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)
+	mv coal$(HEADNODE_VARIANT_SUFFIX)-$(STAMP)-4gb.tgz $(ENGBLD_BITS_DIR)/$(NAME)
+	mv boot$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz $(ENGBLD_BITS_DIR)/$(NAME)
+	mv usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz $(ENGBLD_BITS_DIR)/$(NAME)
+	cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME)
+	cp release.json $(ENGBLD_BITS_DIR)/$(NAME)
 
 #
 # Includes

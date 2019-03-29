@@ -374,7 +374,8 @@ function create_output
         (cd $STAGE \
             && mv USB-headnode.vmwarevm \
             coal-${THIS_BUILDSTAMP}-${USB_SIZE}.vmwarevm \
-            && ${TAR} -I pigz -cf ${ROOT}/coal-${THIS_BUILDSTAMP}-${USB_SIZE}.tgz \
+            && ${TAR} -I ${TAR_COMPRESSION} \
+                -cf ${ROOT}/coal-${THIS_BUILDSTAMP}-${USB_SIZE}.tgz \
             root.password.${LIVEIMG_VERSION} \
             coal-${THIS_BUILDSTAMP}-${USB_SIZE}.vmwarevm *.manifest)
         [[ $? -eq 0 ]] || fatal "Unable to create .tgz image."

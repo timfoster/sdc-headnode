@@ -32,3 +32,4 @@ usb_key.manifest
 root.password.*
 config/config.inc/root.authorized_keys
 /0-*-stamp
+/release.json

@@ -70,6 +70,7 @@ First you must create a suitable build zone:
 Then to set up the zone:
   - A recent version of node (>= 0.10.26, preferably latest).
   - The [json](http://trentm.com/json/) CLI tool.
+  - The 'pigz' program available somewhere on $PATH
 
 ### Build Specification: `build.spec` and `build.spec.local`
 
@@ -181,14 +182,15 @@ Images may also be obtained from a local directory using the `"bits-dir"`
 source.  This is primarily used by MG when building headnode images under
 automation, where MG assembles the build artefacts in a local directory
 structure.  If `"bits-dir"` is used, either through `"source"` for a specific
-zone or via the `"override-all-sources"` top-level key, the `BITS_DIR`
-environment variable must contain the path of a MG-style bits directory.  See
-the source and documentation for [Mountain Gorilla][mg] for more details.
+zone or via the `"override-all-sources"` top-level key, the `SOURCE_BITS_DIR`
+environment variable must contain the path of a MG-style bits directory.
+See the source and documentation for [Mountain Gorilla][mg]
+for more details.
 
 An alternate local directory layout is also supported and can be used by
 setting the `"override-all-sources"` key to the value `"mbits-dir"`. This
-layout matches the layout of the manta directory structure, rather than the
-one created by Mountain Gorilla. As above, the `BITS_DIR` environment variable
+layout matches the layout of the Manta directory structure, rather than the
+one created by Mountain Gorilla. As above, the `SOURCE_BITS_DIR` environment variable
 points to the local directory containing these images.
 
 All of the above definitions will cause the download phase of the build to
@@ -226,7 +228,7 @@ build artefact.
 In addition to zone images and the base images on which they depend, the build
 also includes various individual files.  These files are generally also the
 output of [Mountain Gorilla (MG)][mg] build targets and are obtained either
-from Manta (by default) or an MG-style `BITS_DIR`.
+from Manta (by default) or either an MG-style or Manta-style `SOURCE_BITS_DIR`.
 
 Files are specified in the `"files"` key of `build.spec`.  For example, the
 Triton Agents are bundled together in a shell archive (shar) installer.  This

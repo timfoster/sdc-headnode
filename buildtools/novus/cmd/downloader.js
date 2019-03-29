@@ -264,14 +264,15 @@ bit_enum_zone(be, next) {
 		 */
 		if (source === 'mbits-dir') {
 			bits_from_dir = mod_path.join(
-				process.env.BITS_DIR,
+				process.env.SOURCE_BITS_DIR,
 				jobname, branch + '-latest', jobname);
 		} else {
 			bits_from_dir = mod_path.join(
-				process.env.BITS_DIR, jobname);
+				process.env.SOURCE_BITS_DIR, jobname);
 		}
 
-		mod_assert.string(process.env.BITS_DIR, '$BITS_DIR');
+		mod_assert.string(
+			process.env.SOURCE_BITS_DIR, '$SOURCE_BITS_DIR');
 
 		bits = [];
 		lib_bits_from_dir(bits, {
@@ -375,7 +376,8 @@ bit_enum_file(be, next)
 
 	case 'bits-dir':
 	case 'mbits-dir':
-		mod_assert.string(process.env.BITS_DIR, '$BITS_DIR');
+		mod_assert.string(
+			process.env.SOURCE_BITS_DIR, '$SOURCE_BITS_DIR');
 
 		var bits_from_dir = null;
 		/* We implement very slightly different behaviour between
@@ -385,11 +387,11 @@ bit_enum_file(be, next)
 		 */
 		if (source === 'mbits-dir') {
 			bits_from_dir = mod_path.join(
-				process.env.BITS_DIR,
+				process.env.SOURCE_BITS_DIR,
 				jobname, branch + '-latest', jobname);
 		} else {
 			bits_from_dir = mod_path.join(
-				process.env.BITS_DIR, jobname);
+				process.env.SOURCE_BITS_DIR, jobname);
 		}
 
 		lib_bits_from_dir(be.be_out, {
