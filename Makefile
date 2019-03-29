@@ -276,15 +276,21 @@ deps: 0-npm-stamp build-spec-local
 
 .PHONY: coal
 coal: deps download $(TOOLS_DEPS)
-	TIMESTAMP=$(TIMESTAMP) bin/build-image coal
+	TIMESTAMP=$(TIMESTAMP) \
+	DEBUG_BUILD=$(DEBUG_BUILD) \
+	JOYENT_BUILD=$(JOYENT_BUILD) bin/build-image coal
 
 .PHONY: usb
 usb: deps download $(TOOLS_DEPS)
-	TIMESTAMP=$(TIMESTAMP) bin/build-image usb
+	TIMESTAMP=$(TIMESTAMP) \
+	DEBUG_BUILD=$(DEBUG_BUILD) \
+	JOYENT_BUILD=$(JOYENT_BUILD) bin/build-image usb
 
 .PHONY: boot
 boot: deps download $(TOOLS_DEPS)
-	TIMESTAMP=$(TIMESTAMP) bin/build-image tar
+	TIMESTAMP=$(TIMESTAMP) \
+	DEBUG_BUILD=$(DEBUG_BUILD) \
+	JOYENT_BUILD=$(JOYENT_BUILD) bin/build-image tar
 
 .PHONY: tar
 tar: boot
@@ -299,7 +305,9 @@ download: deps
 	mkdir -p log
 	$(CHECKER)
 	if [ -z $${NO_DOWNLOAD} ]; then \
-		$(DOWNLOADER) -d -w "log/artefacts.json"; \
+		DEBUG_BUILD=$(DEBUG_BUILD) \
+		JOYENT_BUILD=$(JOYENT_BUILD) \
+		    $(DOWNLOADER) -d -w "log/artefacts.json"; \
 	else \
 		true; \
 	fi
@@ -476,9 +484,12 @@ publish: release-json
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
 	mv $(GZ_TOOLS_MANIFEST) $(ENGBLD_BITS_DIR)/$(NAME)
 	mv $(GZ_TOOLS_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)
-	mv coal$(HEADNODE_VARIANT_SUFFIX)-$(STAMP)-4gb.tgz $(ENGBLD_BITS_DIR)/$(NAME)
-	mv boot$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz $(ENGBLD_BITS_DIR)/$(NAME)
-	mv usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz $(ENGBLD_BITS_DIR)/$(NAME)
+	mv coal-$(STAMP)-4gb.tgz \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/coal$(HEADNODE_VARIANT_SUFFIX)-$(STAMP)-4gb.tgz
+	mv boot-$(STAMP).tgz \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/boot$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz
+	mv usb-$(STAMP).tgz \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz
 	cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME)
 	cp release.json $(ENGBLD_BITS_DIR)/$(NAME)
 
