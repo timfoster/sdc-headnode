@@ -183,15 +183,14 @@ source.  This is primarily used by MG when building headnode images under
 automation, where MG assembles the build artefacts in a local directory
 structure.  If `"bits-dir"` is used, either through `"source"` for a specific
 zone or via the `"override-all-sources"` top-level key, the `SOURCE_BITS_DIR`
-environment variable must contain the path of a MG-style bits directory.
-See the source and documentation for [Mountain Gorilla][mg]
-for more details.
+environment variable must contain the path of a MG-style bits directory.  See
+the source and documentation for [Mountain Gorilla][mg] for more details.
 
 An alternate local directory layout is also supported and can be used by
 setting the `"override-all-sources"` key to the value `"mbits-dir"`. This
-layout matches the layout of the Manta directory structure, rather than the
-one created by Mountain Gorilla. As above, the `SOURCE_BITS_DIR` environment variable
-points to the local directory containing these images.
+layout matches the layout of the manta directory structure, rather than the
+one created by Mountain Gorilla. As above, the `SOURCE_BITS_DIR` environment
+variable points to the local directory containing these images.
 
 All of the above definitions will cause the download phase of the build to
 store a local copy of the zone dataset stream and manifest in the `cache/`
@@ -305,17 +304,53 @@ The default branch may be overridden by specifying the `"bits-branch"` key.
 The build branch for an individual zone or file may be overriden by specifying
 `"branch"` in the artefact definition.  For example, to obtain artefacts from
 the `release-20150514` branch for everything except the platform (and platform
-boot tarball), the following could be used in `build.spec.local`:
+boot tarball) and cnapi zone, the following could be used in
+`build.spec.local`:
 
 ```
 {
     "bits-branch": "release-20150514",
+    "zones": {
+        "cnapi": {"branch": "master"}
+    }
     "files": {
         "platform": { "branch": "master" },
         "platboot": { "branch": "master" }
     }
 }
 ```
+
+As a convenience, the build will first look for a file called
+`configure-branches` and will convert that to a `build.spec.local` file if
+one does not already exist. This allows users to supply simple `component`
+and `branch` data in an easier form. The above `build.spec.local` fragment
+would be written:
+
+```
+bits-branch: release-20150514
+cnapi: master
+platform: master
+```
+
+Note here, that since the `platform` and `platboot` artifacts should always
+be matched, the tool which converts the `configure-branches` file will
+set the complementary values automatically. Any keys that do not map directly
+to a component (for example, `bits-branches` in the above snippet) are taken
+as top-level keys for the `build.spec.local` file.
+
+If more complicated `build.spec.local` content is required, for example the
+alternative build timestamp selection we discuss below, users should write a
+full `build.spec.local` file instead.
+
+If a `build.spec.local` file does not exist, then the build defaults to
+creating the following file:
+
+```
+{"bits-branches": "$(BRANCH)"}
+```
+
+where `$(BRANCH)` is the current branch of sdc-headnode.git that is being
+built.
 
 #### Alternative build timestamp selection
 

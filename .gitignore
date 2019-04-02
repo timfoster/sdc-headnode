@@ -10,6 +10,7 @@
 /config/*.local
 /config/root.authorized_keys
 /build.spec.local
+/configure-branches
 /*.vmwarevm
 /*.img
 /log

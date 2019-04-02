@@ -264,15 +264,50 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 # e.g. refs/remotes/origin/master
 #
 .PHONY: build-spec-local
-build-spec-local:
+build-spec-local: convert-configure-branches
 	if [ ! -f build.spec.local ]; then \
 	    echo "{\"bits-branch\": \"$(BRANCH)\"}" > build.spec.local; \
 	fi
 
+#
+# Primarily a convenience for developers, we convert a simple
+# 'configure-branches' file into a 'build.spec.local' file if a
+# configure-branches file is present and a 'build.spec.local file is not
+# present. This allows developers configure which branches should be used
+# for the build, without having to write JSON manually.
+#
+# The format of configure-branches (also used by the platform build) is:
+#
+# <key> <colon> <value>
+# <hash comment> [any text]
+#
+.PHONY: convert-configure-branches
+convert-configure-branches:
+	if [ ! -f build.spec.local ] && [ -f configure-branches ]; then \
+	    ./bin/convert-configure-branches.js > build.spec.local; \
+	fi
+
+#
+# Delete any failed image files that might be sitting around before building.
+# This is safe because only one headnode build runs at a time. Also cleanup any
+# unused lofi devices (used ones will just fail)
+#
+.PHONY: clean-img-cruft
+clean-img-cruft:
+ifeq ($(shell uname -s),SunOS)
+	pfexec rm -vf /tmp/*4gb.img
+	for dev in $(shell lofiadm | cut -d ' ' -f1 | grep -v "^Block"); do  \
+	    mount | grep "on $${dev}" | cut -d' ' -f1 | while read mntpath; do \
+	        pfexec umount $${mntpath}; \
+	        done; \
+	    pfexec lofiadm -d $${dev}; \
+	done
+endif
+
 CLEAN_FILES += 0-npm-stamp
 
 .PHONY: deps
-deps: 0-npm-stamp build-spec-local
+deps: 0-npm-stamp clean-img-cruft build-spec-local
 
 .PHONY: coal
 coal: deps download $(TOOLS_DEPS)
