@@ -257,19 +257,6 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 	touch $@
 
 #
-# If a specific build.spec.local file does not exist, create a default
-# using the $(BRANCH), likely passed to us from jenkins, denoting the branch
-# of smartos-live we're using. As eng.git already converts that into a
-# short-form branch name, we don't need to worry about long form branch names
-# e.g. refs/remotes/origin/master
-#
-.PHONY: build-spec-local
-build-spec-local: convert-configure-branches
-	if [ ! -f build.spec.local ]; then \
-	    echo "{\"bits-branch\": \"$(BRANCH)\"}" > build.spec.local; \
-	fi
-
-#
 # Primarily a convenience for developers, we convert a simple
 # 'configure-branches' file into a 'build.spec.local' file if a
 # configure-branches file is present and a 'build.spec.local file is not
@@ -285,6 +272,19 @@ build-spec-local: convert-configure-branches
 convert-configure-branches:
 	if [ ! -f build.spec.local ] && [ -f configure-branches ]; then \
 	    ./bin/convert-configure-branches.js > build.spec.local; \
+	fi
+
+#
+# If a specific build.spec.local file does not exist, create a default
+# using the $(BRANCH), likely passed to us from jenkins, denoting the branch
+# of smartos-live we're using. As eng.git already converts that into a
+# short-form branch name, we don't need to worry about long form branch names
+# e.g. refs/remotes/origin/master
+#
+.PHONY: build-spec-local
+build-spec-local: convert-configure-branches
+	if [ ! -f build.spec.local ]; then \
+	    echo "{\"bits-branch\": \"$(BRANCH)\"}" > build.spec.local; \
 	fi
 
 #
@@ -513,7 +513,14 @@ release-json:
 	   \"usb\": \"usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz\" \
 	}" | json > release.json
 
-
+#
+# This publish target rewrites 'latest-build-stamp' overriding what
+# Makefile.targ does in its 'prepublish' target. This is here so that we can
+# invoke 'bits-upload-latest', and get a Manta directory path that includes
+# the timestamp annotated with the output from 'unique-branches'. This serves
+# to disambiguate headnode builds that were assembled from different sets
+# of component images.
+#
 .PHONY: publish
 publish: release-json
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
@@ -527,6 +534,8 @@ publish: release-json
 	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz
 	cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME)
 	cp release.json $(ENGBLD_BITS_DIR)/$(NAME)
+	echo "$(STAMP)-$$(./bin/unique-branches)" > \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/latest-build-stamp
 
 #
 # Includes
