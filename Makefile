@@ -258,7 +258,7 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 
 #
 # If a specific build.spec.local file does not exist, create a default
-# using the $(BRANCH) likely passed to us from jenkins denoting the branch
+# using the $(BRANCH), likely passed to us from jenkins, denoting the branch
 # of smartos-live we're using. As eng.git already converts that into a
 # short-form branch name, we don't need to worry about long form branch names
 # e.g. refs/remotes/origin/master
@@ -273,8 +273,8 @@ build-spec-local: convert-configure-branches
 # Primarily a convenience for developers, we convert a simple
 # 'configure-branches' file into a 'build.spec.local' file if a
 # configure-branches file is present and a 'build.spec.local file is not
-# present. This allows developers configure which branches should be used
-# for the build, without having to write JSON manually.
+# present. This allows developers to configure which branches should be used
+# for the build without having to write JSON manually.
 #
 # The format of configure-branches (also used by the platform build) is:
 #

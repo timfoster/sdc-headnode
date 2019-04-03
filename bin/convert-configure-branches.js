@@ -1,4 +1,4 @@
-#!/bin/env node
+#!/usr/bin/env node
 
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,17 +13,20 @@
 var mod_fs = require('fs');
 
 /*
- * This script loads a build.spec file, then lazily parses a
- * configure-branches file and emits a build.spec.local with that data.
- * There is minimal error checking here.
+ * This script loads a build.spec file, then parses a configure-branches file
+ * and emits a build.spec.local with that data. There is minimal error checking
+ * here.
+ *
+ * The 'configure-branches' file is assumed to consist of lines of
+ * colon-separated component:branch pairs, and that component names are not
+ * allowed to contain colons. Comments are allowed, by starting a line with
+ * a '#' character.
  */
 
-function
-main()
-{
+function main() {
     mod_fs.readFile('build.spec', 'utf-8', function readbs(err, bs_file) {
         if (err) {
-            console.error('Error loading build specs: %s', err.stack);
+            console.error('Error loading build.spec file: %s', err);
             process.exit(3);
         }
 
@@ -51,28 +54,51 @@ main()
                     continue;
                 }
 
-                var keyval = line.split(':');
-                if (keyval.length !== 2) {
-                    console.error('Line has more than two fields: %s', line);
+                // we're not using split() because we want exactly two fields
+                // but don't want to throw away branch names which may include
+                // colons.
+                var colon_index = line.indexOf(':');
+                if (colon_index === line.length - 1 || colon_index === -1) {
+                    console.error(
+                        'Expected key:val pair on line %s, got: %s', i + 1,
+                        line);
                     process.exit(3);
                 }
+                var key = line.slice(0, colon_index).trim();
+                var val = line.slice(colon_index + 1, line.length).trim();
 
-                var key = keyval[0].trim();
-                var val = keyval[1].trim();
+                if (key.length === 0 || val.length === 0) {
+                    console.error(
+                        'Invalid key/val pair on line %s: %s', i + 1, line);
+                    process.exit(3);
+                }
 
                 // zones
                 if (known_zones.lastIndexOf(key) > -1) {
                     if (out_buildspec.zones === undefined) {
                         out_buildspec.zones = {};
                     }
-                    out_buildspec.zones[key] = {'branch': val};
+                    if (out_buildspec.zones[key] === undefined) {
+                        out_buildspec.zones[key] = {'branch': val};
+                    } else {
+                        console.log(out_buildspec.zones[key]);
+                        console.error(
+                            'Duplicate key on line %s: %s', i + 1, line);
+                        process.exit(3);
+                    }
 
                 // files
                 } else if (known_files.lastIndexOf(key) > -1) {
                     if (out_buildspec.files === undefined) {
                         out_buildspec.files = {};
                     }
-                    out_buildspec.files[key] = {'branch': val};
+                    if (out_buildspec.files[key] === undefined) {
+                        out_buildspec.files[key] = {'branch': val};
+                    } else {
+                        console.error(
+                            'Duplicate key on line %s: %s', i + 1, line);
+                        process.exit(3);
+                    }
                     if (key === 'platform') {
                         out_buildspec.files['platboot'] = {'branch': val};
                     } else if (key === 'platboot') {
@@ -83,8 +109,8 @@ main()
                 } else {
                     if (bs_data[key] === undefined) {
                         console.error(
-                            'Unknown key in configure-branches file, ' +
-                            'line %s :%s', i+1, key);
+                            'Unknown build.spec key in configure-branches ' +
+                            'file, line %s: %s', i + 1, key);
                         process.exit(3);
                     }
                     out_buildspec[key] = val;
