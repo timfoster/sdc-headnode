@@ -259,9 +259,13 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 #
 # Primarily a convenience for developers, we convert a simple
 # 'configure-branches' file into a 'build.spec.local' file if a
-# configure-branches file is present and a 'build.spec.local file is not
-# present. This allows developers to configure which branches should be used
-# for the build without having to write JSON manually.
+# configure-branches file is present. This allows developers to declare which
+# branches should be used for the build without having to write JSON manually.
+#
+# If both a configure-branches and a build.spec.local file exist, we ensure
+# they are identical before proceeding (to prevent confusion where we may
+# otherwise assemble a headnode based on a now-stale build.spec.local file)
+# We use diff rather than a logical compare, but it will do.
 #
 # The format of configure-branches (also used by the platform build) is:
 #
@@ -270,8 +274,23 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 #
 .PHONY: convert-configure-branches
 convert-configure-branches:
-	if [ ! -f build.spec.local ] && [ -f configure-branches ]; then \
-	    ./bin/convert-configure-branches.js > build.spec.local; \
+	@if [ -f configure-branches ]; then \
+	    if [ ! -f build.spec.local ]; then \
+	        echo "converting configure-branches to build.spec.local"; \
+	        ./bin/convert-configure-branches.js > build.spec.local; \
+	    else \
+	        ./bin/convert-configure-branches.js > /tmp/b.s.local.$$$$; \
+	        DIFF=$$(diff /tmp/b.s.local.$$$$ build.spec.local); \
+	        RES=$$?; \
+	        rm /tmp/b.s.local.$$$$; \
+	        if [ $$RES -ne 0 ]; then \
+	            echo "WARNING: an existing build.spec.local was found and"; \
+	            echo "differs from configure-branches."; \
+	            echo "Delete either the stale build.spec.local or the"; \
+	            echo "configure-branches file to resolve this."; \
+	            echo "$$DIFF"; \
+	        fi \
+	    fi \
 	fi
 
 #
