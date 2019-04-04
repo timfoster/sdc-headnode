@@ -99,11 +99,22 @@ function main() {
                             'Duplicate key on line %s: %s', i + 1, line);
                         process.exit(3);
                     }
-                    if (key === 'platform') {
-                        out_buildspec.files['platboot'] = {'branch': val};
-                    } else if (key === 'platboot') {
-                        out_buildspec.files['platform'] = {'branch': val};
-                    }
+
+                    // some components should have the same branch set
+                    // if either appear in the configure-branches file.
+                    var same_branches = [
+                        ['platform', 'platboot'],
+                        ['agents', 'agents_md5']
+                    ];
+                    same_branches.forEach(function dup(dup_pair) {
+                        console.error(
+                            'Note: setting common branch for %s', dup_pair);
+                        if (dup_pair.indexOf(key) !== -1) {
+                            dup_pair.forEach(function set_val(comp) {
+                                out_buildspec.files[comp] = {'branch': val};
+                            });
+                        }
+                    });
 
                 // any other fields
                 } else {
