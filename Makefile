@@ -374,6 +374,11 @@ coal-and-open: coal
 update-tools-modules:
 	./bin/mk-sdc-clients-light.sh v11.3.1 tools/node_modules/sdc-clients
 
+#
+# Unlike the rest of the headnode artifacts, $(STAMP) here really does reflect
+# the contents of the gz-tools bits. Elsewhere, we use ${PUB_STAMP} to take
+# account of any build.spec.local changes
+#
 GZ_TOOLS_STAMP := gz-tools-$(STAMP)
 GZ_TOOLS_MANIFEST := $(GZ_TOOLS_STAMP).manifest
 GZ_TOOLS_TARBALL := $(GZ_TOOLS_STAMP).tgz
@@ -529,12 +534,13 @@ $(SDC_ZONE_MAN_LINKS):
 #
 .PHONY: release-json
 release-json:
+	PUB_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))-$(TIMESTAMP)-$(_GITDESCRIBE); \
 	echo "{ \
 	   \"date\": \"$(TIMESTAMP)\", \
 	   \"branch\": \"$(BRANCH)\", \
-	   \"coal\": \"coal$(HEADNODE_VARIANT_SUFFIX)-$(STAMP)-4g.tgz\", \
-	   \"boot\": \"boot$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz\", \
-	   \"usb\": \"usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz\" \
+	   \"coal\": \"coal$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP-4g.tgz\", \
+	   \"boot\": \"boot$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP.tgz\", \
+	   \"usb\": \"usb$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP.tgz\" \
 	}" | json > release.json
 
 #
@@ -550,16 +556,17 @@ publish: release-json
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
 	mv $(GZ_TOOLS_MANIFEST) $(ENGBLD_BITS_DIR)/$(NAME)
 	mv $(GZ_TOOLS_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)
+	PUB_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))-$(TIMESTAMP)-$(_GITDESCRIBE); \
 	mv coal-$(STAMP)-4gb.tgz \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/coal$(HEADNODE_VARIANT_SUFFIX)-$(STAMP)-4gb.tgz
+	    $(ENGBLD_BITS_DIR)/$(NAME)/coal$(HEADNODE_VARIANT_SUFFIX)$$PUB_STAMP-4gb.tgz && \
 	mv boot-$(STAMP).tgz \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/boot$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz
+	    $(ENGBLD_BITS_DIR)/$(NAME)/boot$(HEADNODE_VARIANT_SUFFIX)$$PUB_STAMP.tgz && \
 	mv usb-$(STAMP).tgz \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)-$(STAMP).tgz
+	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)$$PUB_STAMP.tgz && \
+	echo "$$PUB_STAMP" > \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/latest-build-stamp
 	cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME)
 	cp release.json $(ENGBLD_BITS_DIR)/$(NAME)
-	echo "$(STAMP)-$$(./bin/unique-branches)" > \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/latest-build-stamp
 
 #
 # Includes

@@ -11,9 +11,14 @@
  */
 
  /*
-  * Used as part of the path name where artifacts for the headnode build
-  * are stored in Manta, emit a hypen separated list of the unique branch
-  * names for this build, as defined by build.spec and build.spec.local.
+  * This is used by the top level sdc-headnode Makefile to determine
+  * part of the path name for build artifacts. If the branches
+  * declared by components in the combined build.spec/build.spec.local
+  * configuration differ from the branch passed in as the first argument
+  * (in our case, the branch of sdc-headnode.git itself), emit a
+  * hyphen-separated list of all branches used.
+  *
+  * This lets us differentiate development headnode builds from each other.
   */
 var util = require('util');
 
@@ -21,6 +26,14 @@ var lib_common = require('../lib/common');
 var lib_buildspec = require('../lib/buildspec');
 
 function main() {
+
+    if (process.argv.length !== 3) {
+        console.error('Usage: unique-branches [branch]');
+        process.exit(2);
+    }
+
+    var headnode_branch = process.argv[2];
+
     lib_buildspec.load_build_specs(lib_common.root_path('build.spec'),
         lib_common.root_path('build.spec.local'), function (err, bs) {
         if (err) {
@@ -51,9 +64,20 @@ function main() {
         find_branches(branches, zones, 'zones');
         find_branches(branches, files, 'files');
 
+        // if the only branches found were the same as the branch we were
+        // given on the command line, then emit nothing and return. This
+        // allows build artifacts of the form:
+        // [name]-[headnode branch]-[timestamp]-[githash]
+        delete branches[headnode_branch];
+        if (Object.keys(branches).length === 1) {
+            process.exit(0);
+        }
+
+        // otherwise our artifacts take the form:
+        // [name]-[headnode branch]-[branch-list]-[timestamp]-[githash]
         var branch_string = Object.keys(branches).sort().join('-');
         if (branch_string.length !== 0) {
-            console.log(branch_string);
+            console.log('-' + branch_string);
         }
         process.exit(0);
     });
