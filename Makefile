@@ -530,7 +530,9 @@ $(SDC_ZONE_MAN_LINKS):
 	ln -s ../../sdc/man/man1/$(@F) $@
 
 #
-# Artifact publication, typically used for Jenkins builds.
+# Artifact publication, typically used for Jenkins builds. We compute
+# PUB_STAMP in the target rather than as a Makefile macro since its value
+# depends on us possibly generating a build.spec.local file first.
 #
 .PHONY: release-json
 release-json:
