@@ -560,11 +560,11 @@ publish: release-json
 	mv $(GZ_TOOLS_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)
 	PUB_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))-$(TIMESTAMP)-$(_GITDESCRIBE); \
 	mv coal-$(STAMP)-4gb.tgz \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/coal$(HEADNODE_VARIANT_SUFFIX)$$PUB_STAMP-4gb.tgz && \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/coal$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP-4gb.tgz && \
 	mv boot-$(STAMP).tgz \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/boot$(HEADNODE_VARIANT_SUFFIX)$$PUB_STAMP.tgz && \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/boot$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP.tgz && \
 	mv usb-$(STAMP).tgz \
-	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)$$PUB_STAMP.tgz && \
+	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP.tgz && \
 	echo "$$PUB_STAMP" > \
 	    $(ENGBLD_BITS_DIR)/$(NAME)/latest-build-stamp
 	cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME)
