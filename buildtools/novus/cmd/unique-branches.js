@@ -69,13 +69,15 @@ function main() {
         // allows build artifacts of the form:
         // [name]-[headnode branch]-[timestamp]-[githash]
         delete branches[headnode_branch];
-        if (Object.keys(branches).length === 1) {
+        var known_branches = Object.keys(branches);
+        if (known_branches.length === 1 &&
+                known_branches[0] === headnode_branch) {
             process.exit(0);
         }
 
         // otherwise our artifacts take the form:
         // [name]-[headnode branch]-[branch-list]-[timestamp]-[githash]
-        var branch_string = Object.keys(branches).sort().join('-');
+        var branch_string = known_branches.sort().join('-');
         if (branch_string.length !== 0) {
             console.log('-' + branch_string);
         }
