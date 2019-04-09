@@ -21,6 +21,9 @@ var mod_fs = require('fs');
  * colon-separated component:branch pairs, and that component names are not
  * allowed to contain colons. Comments are allowed, by starting a line with
  * a '#' character.
+ *
+ * Duplicate keys in configure-branches are not allowed. Some 'files'
+ * components should have matching branch values, so we enforce that.
  */
 
 function main() {
@@ -100,16 +103,16 @@ function main() {
                         process.exit(3);
                     }
 
-                    // some components should have the same branch set
+                    // some files components should have the same branch set
                     // if either appear in the configure-branches file.
                     var same_branches = [
                         ['platform', 'platboot'],
                         ['agents', 'agents_md5']
                     ];
                     same_branches.forEach(function dup(dup_pair) {
-                        console.error(
-                            'Note: setting common branch for %s', dup_pair);
                         if (dup_pair.indexOf(key) !== -1) {
+                            console.error(
+                                'Note: setting common branch for %s', dup_pair);
                             dup_pair.forEach(function set_val(comp) {
                                 out_buildspec.files[comp] = {'branch': val};
                             });
