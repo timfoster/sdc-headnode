@@ -559,6 +559,7 @@ publish: release-json
 	mv $(GZ_TOOLS_MANIFEST) $(ENGBLD_BITS_DIR)/$(NAME)
 	mv $(GZ_TOOLS_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)
 	PUB_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))-$(TIMESTAMP)-$(_GITDESCRIBE); \
+	BRANCH_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))
 	mv coal-$(STAMP)-4gb.tgz \
 	    $(ENGBLD_BITS_DIR)/$(NAME)/coal$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP-4gb.tgz && \
 	mv boot-$(STAMP).tgz \
@@ -580,9 +581,9 @@ ENGBLD_BITS_UPLOAD_OVERRIDE=true
 #
 .PHONY: bits-upload
 bits-upload: build-spec-local publish $(BUILDIMAGE_TARG)
-	PUB_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))-$(TIMESTAMP)-$(_GITDESCRIBE); \
-	echo $(TOP)/deps/eng/tools/bits-upload.sh \
-	    -b $$PUB_STAMP \
+	BRANCH_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH)); \
+	$(TOP)/deps/eng/tools/bits-upload.sh \
+	    -b $$BRANCH_STAMP \
 	    $(BITS_UPLOAD_LOCAL_ARG) \
 	    $(BITS_UPLOAD_IMGAPI_ARG) \
 	    -d $(ENGBLD_DEST_OUT_PATH)/$(NAME) \
@@ -592,9 +593,9 @@ bits-upload: build-spec-local publish $(BUILDIMAGE_TARG)
 
 .PHONY: bits-upload-latest
 bits-upload-latest: build-spec-local
-	PUB_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH))-$(TIMESTAMP)-$(_GITDESCRIBE); \
+	BRANCH_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH)); \
 	echo $(TOP)/deps/eng/tools/bits-upload.sh \
-	    -b $$PUB_STAMP \
+	    -b $$BRANCH_STAMP \
 	    $(BITS_UPLOAD_LOCAL_ARG) \
 	    $(BITS_UPLOAD_IMGAPI_ARG) \
 	    -d $(ENGBLD_DEST_OUT_PATH)/$(NAME) \
