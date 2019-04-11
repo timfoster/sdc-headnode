@@ -23,9 +23,6 @@ ifdef HEADNODE_VARIANT
 endif
 
 NAME = headnode$(HEADNODE_VARIANT_SUFFIX)
-# XXX timf: while testing, we want this only going to /stor/timf-builds
-# remove the following line before integration.
-ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
 
 ifeq ($(HEADNODE_VARIANT), debug)
     DEBUG_BUILD=true
@@ -33,17 +30,15 @@ endif
 
 ifeq ($(HEADNODE_VARIANT), joyent)
     JOYENT_BUILD=true
-    # XXX timf: this is internal, so before integration,
-    # this should change to /stor/builds
-    ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
+    # this is an internal build.
+    ENGBLD_DEST_OUT_PATH ?= /stor/builds
 endif
 
 ifeq ($(HEADNODE_VARIANT), joyent-debug)
     JOYENT_BUILD=true
     DEBUG_BUILD=true
-    # XXX timf: this is internal, so before integration,
-    # this should change to /stor/builds
-    ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
+    # this is an internal build.
+    ENGBLD_DEST_OUT_PATH ?= /stor/builds
 endif
 
 ifdef DEBUG_BUILD
