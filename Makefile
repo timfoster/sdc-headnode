@@ -46,6 +46,10 @@ ifeq ($(HEADNODE_VARIANT), joyent-debug)
     ENGBLD_DEST_OUT_PATH ?= /stor/timf-builds
 endif
 
+ifdef DEBUG_BUILD
+    DEBUG_SUFFIX=-debug
+endif
+
 #
 # Files
 #
@@ -477,7 +481,7 @@ USBKEY_SCRIPTS = \
 
 USBKEY_TARBALLS = \
 	cache/file.ipxe.tar.gz \
-	cache/file.platboot.tgz
+	cache/file.platboot$(DEBUG_SUFFIX).tgz
 
 $(USBKEY_TARBALLS): download
 
