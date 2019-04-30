@@ -254,22 +254,12 @@ bit_enum_zone(be, next) {
 		return;
 
 	case 'bits-dir':
-	case 'mbits-dir':
-		var bits_from_dir = null;
 		/*
-		 * We implement very slightly different behaviour
-		 * between bits-dir and mbits-dir, the former uses
-		 * an MG-style directory layout, the latter uses
-		 * Manta-style directory layout.
+		 * bits-dir uses a directory layout that mirrors our Manta uploads.
 		 */
-		if (source === 'mbits-dir') {
-			bits_from_dir = mod_path.join(
-				process.env.SOURCE_BITS_DIR,
-				jobname, branch + '-latest', jobname);
-		} else {
-			bits_from_dir = mod_path.join(
-				process.env.SOURCE_BITS_DIR, jobname);
-		}
+		var bits_from_dir = mod_path.join(
+			process.env.SOURCE_BITS_DIR,
+			jobname, branch + '-latest', jobname);
 
 		mod_assert.string(
 			process.env.SOURCE_BITS_DIR, '$SOURCE_BITS_DIR');
@@ -375,24 +365,15 @@ bit_enum_file(be, next)
 		return;
 
 	case 'bits-dir':
-	case 'mbits-dir':
 		mod_assert.string(
 			process.env.SOURCE_BITS_DIR, '$SOURCE_BITS_DIR');
 
-		var bits_from_dir = null;
-		/* We implement very slightly different behaviour between
-		 * bits-dir and mbits-dir, the former uses an MG-style
-		 * directory layout, the latter uses Manta-style directory
-		 * layout.
+		/*
+		 * bits-dir uses a directory layout that mirrors our Manta uploads.
 		 */
-		if (source === 'mbits-dir') {
-			bits_from_dir = mod_path.join(
-				process.env.SOURCE_BITS_DIR,
-				jobname, branch + '-latest', jobname);
-		} else {
-			bits_from_dir = mod_path.join(
-				process.env.SOURCE_BITS_DIR, jobname);
-		}
+		var bits_from_dir = mod_path.join(
+			process.env.SOURCE_BITS_DIR,
+			jobname, branch + '-latest', jobname);
 
 		lib_bits_from_dir(be.be_out, {
 			bfd_dir: bits_from_dir,

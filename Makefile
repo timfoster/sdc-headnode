@@ -12,8 +12,8 @@
 PERCENT := %
 
 #
-# The headnode build the following variants, declared by the $(HEADNODE_VARIANT)
-# variable:
+# The headnode build has the following variants, declared by the
+# $(HEADNODE_VARIANT) macro:
 # 'debug'           use a debug platform image
 # 'joyent'          include specific firmware for Joyent deployments
 # 'joyent-debug'    a combination of the above
