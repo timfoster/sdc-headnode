@@ -18,8 +18,8 @@ if [[ "$PLATFORM" == "SunOS" ]]; then
     SUCMD="pfexec"
     TAR="gtar"
     PCFSTAR="gtar"
-    if [[ -z "$TAR_COMPRESSION" ]]; then
-        TAR_COMPRESSION=pigz
+    if [[ -z "$TAR_COMPRESSION_ARG" ]]; then
+        TAR_COMPRESSION_ARG="-I pigz"
     fi
 elif [[ "$PLATFORM" == "Darwin" ]]; then
     SUCMD=""
@@ -35,8 +35,8 @@ elif [[ "$PLATFORM" == "Linux" ]]; then
     SUCMD="sudo"
 fi
 
-if [[ -z "$TAR_COMPRESSION" ]]; then
-    TAR_COMPRESSION=gzip
+if [[ -z "$TAR_COMPRESSION_ARG" ]]; then
+    TAR_COMPRESSION_ARG="-z"
 fi
 
 function fatal

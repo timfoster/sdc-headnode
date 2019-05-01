@@ -302,7 +302,7 @@ function create_output
         (cd $STAGE \
             && mv USB-headnode.vmwarevm \
             coal-${THIS_BUILDSTAMP}-${USB_SIZE}.vmwarevm \
-            && ${TAR} -I ${TAR_COMPRESSION} \
+            && ${TAR} ${TAR_COMPRESSION_ARG} \
                 -cf ${ROOT}/coal-${THIS_BUILDSTAMP}-${USB_SIZE}.tgz \
             root.password.${LIVEIMG_VERSION} \
             coal-${THIS_BUILDSTAMP}-${USB_SIZE}.vmwarevm *.manifest)

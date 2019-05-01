@@ -185,7 +185,7 @@ function create_output
             usb-${THIS_BUILDSTAMP}-${OUTPUT_IMG} \
             && mv $IMG_TMP_DIR/$PARTMAP \
             usb-${THIS_BUILDSTAMP}-$PARTMAP \
-            && ${TAR} -I ${TAR_COMPRESSION} \
+            && ${TAR} ${TAR_COMPRESSION_ARG} \
             -cf ${ROOT}/usb-${THIS_BUILDSTAMP}.tgz \
             root.password.${LIVEIMG_VERSION} \
 	    usb-${THIS_BUILDSTAMP}-$PARTMAP \

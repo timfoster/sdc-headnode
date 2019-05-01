@@ -52,11 +52,11 @@ endif
 ifeq ($(shell uname -s),SunOS)
 GREP = /usr/xpg4/bin/grep
 TAR = gtar
-TAR_COMPRESSION = pigz
+TAR_COMPRESSION_ARG = -I pigz
 else
 GREP = grep
 TAR = tar
-TAR_COMPRESSION = gzip
+TAR_COMPRESSION_ARG = -z
 endif
 
 BASH_FILES := \
@@ -362,7 +362,7 @@ gz-tools: $(TOOLS_DEPS)
 		$(TOP)/default \
 		$(TOP)/scripts \
 		build/$(GZ_TOOLS_STAMP)/gz-tools
-	(cd build/$(GZ_TOOLS_STAMP) && $(TAR) -I $(TAR_COMPRESSION) -cf ../../$(GZ_TOOLS_TARBALL) gz-tools)
+	(cd build/$(GZ_TOOLS_STAMP) && $(TAR) $(TAR_COMPRESSION_ARG) -cf ../../$(GZ_TOOLS_TARBALL) gz-tools)
 	cat $(PROTO)/opt/smartdc/etc/gz-tools.image > build/$(GZ_TOOLS_STAMP)/image_uuid
 	cat $(TOP)/manifests/gz-tools.manifest.tmpl | sed \
 		-e "s/UUID/$$(cat build/$(GZ_TOOLS_STAMP)/image_uuid)/" \
@@ -386,7 +386,7 @@ CLEAN_FILES += build/gz-tools *.tgz \
 
 tools.tar.gz: tools
 	rm -f $(TOP)/tools.tar.gz
-	cd $(PROTO)/opt/smartdc && $(TAR) -I $(TAR_COMPRESSION) -cf $(TOP)/$(@F) \
+	cd $(PROTO)/opt/smartdc && $(TAR) $(TAR_COMPRESSION_ARG) -cf $(TOP)/$(@F) \
 	    bin cmd share lib man node_modules etc
 
 #
@@ -395,7 +395,7 @@ tools.tar.gz: tools
 
 cn_tools.tar.gz: tools
 	rm -f $(TOP)/cn_tools.tar.gz
-	cd $(PROTO)/opt/smartdc && $(TAR) -I $(TAR_COMPRESSION) -cf $(TOP)/$(@F) \
+	cd $(PROTO)/opt/smartdc && $(TAR) $(TAR_COMPRESSION_ARG) -cf $(TOP)/$(@F) \
 	    $(CN_TOOLS_FILES)
 
 #
