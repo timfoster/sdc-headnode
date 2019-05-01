@@ -332,11 +332,12 @@ cnapi: master
 platform: master
 ```
 
-Note here, that since the `platform` and `platboot` artifacts should always
-be matched, the tool which converts the `configure-branches` file will
-set the complementary values automatically. Any keys that do not map directly
-to a component (for example, `bits-branches` in the above snippet) are taken
-as top-level keys for the `build.spec.local` file.
+Note here, that since the `platform`, `platimages` and `platboot` artifacts
+and the `agents` and `agents_md5` artifacts should always be matched. The tool
+which converts the `configure-branches` file will set the complementary values
+automatically. Any keys that do not map directly to a component (for example,
+`bits-branch` in the above snippet) are taken as top-level keys for the
+`build.spec.local` file.
 
 If more complicated `build.spec.local` content is required, for example the
 alternative build timestamp selection we discuss below, users should write a

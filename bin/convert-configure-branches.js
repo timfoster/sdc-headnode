@@ -46,14 +46,28 @@ function main() {
                 process.exit(3);
             }
             var vals = data.split('\n');
-            for (var i=0; i < vals.length; i++) {
+
+            // some files components should have the same branch set
+            // if any appear in the configure-branches file. Define
+            // those groups, and track the ones we've seen in
+            // configure-branches to check for mismatched ones.
+            var same_branches = {
+                'platform': ['platform', 'platboot', 'platimages'],
+                'agents': ['agents', 'agents_md5']
+            };
+            // Use a separate list to check for configure-branches 'files'
+            // duplicates, since we automatically add required duplicates
+            // to out_buildspec.files.
+            var seen_file_branches = [];
+
+            for (var i= 0 ; i < vals.length; i++) {
                 var line = vals[i].trim();
                 if (line.length === 0) {
                     continue;
                 }
 
                 // ignore comments
-                if (line.lastIndexOf('#') === 0) {
+                if (line[0] === '#') {
                     continue;
                 }
 
@@ -95,29 +109,40 @@ function main() {
                     if (out_buildspec.files === undefined) {
                         out_buildspec.files = {};
                     }
-                    if (out_buildspec.files[key] === undefined) {
-                        out_buildspec.files[key] = {'branch': val};
-                    } else {
+                    if (seen_file_branches.indexOf(key) !== -1) {
                         console.error(
                             'Duplicate key on line %s: %s', i + 1, line);
                         process.exit(3);
+                    } else {
+                        seen_file_branches.push(key);
+                        out_buildspec.files[key] = {'branch': val};
                     }
+                    // set any required duplicates, also looking for mismatched
+                    // values from configure-branches
+                    for (var same_key in same_branches) {
+                        // the list of keys that must have the same
+                        var same_list = same_branches[same_key];
 
-                    // some files components should have the same branch set
-                    // if either appear in the configure-branches file.
-                    var same_branches = [
-                        ['platform', 'platboot'],
-                        ['agents', 'agents_md5']
-                    ];
-                    same_branches.forEach(function dup(dup_pair) {
-                        if (dup_pair.indexOf(key) !== -1) {
-                            console.error(
-                                'Note: setting common branch for %s', dup_pair);
-                            dup_pair.forEach(function set_val(comp) {
-                                out_buildspec.files[comp] = {'branch': val};
-                            });
+                        if (same_list.indexOf(key) !== -1) {
+                            for (var j = 0; j < same_list.length; j++) {
+                                var comp = same_list[j];
+                                if (comp === key) {
+                                    continue;
+                                }
+                                var existing_val = out_buildspec.files[comp];
+                                if (existing_val !== undefined &&
+                                    existing_val.branch !== val) {
+                                    console.error(
+                                        'values across %s must be identical. ' +
+                                        'See line %s: %s',
+                                        same_list.join(', '), i + 1, key);
+                                    process.exit(3);
+                                } else {
+                                    out_buildspec.files[comp] = {'branch': val};
+                                }
+                            }
                         }
-                    });
+                    }
 
                 // any other fields
                 } else {
