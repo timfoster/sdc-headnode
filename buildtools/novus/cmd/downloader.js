@@ -255,7 +255,7 @@ bit_enum_zone(be, next) {
 
 	case 'bits-dir':
 		/*
-		 * bits-dir uses a directory layout that mirrors our Manta uploads.
+		 * bits-dir uses a directory layout mirroring our Manta uploads.
 		 */
 		var bits_from_dir = mod_path.join(
 			process.env.SOURCE_BITS_DIR,
@@ -369,7 +369,7 @@ bit_enum_file(be, next)
 			process.env.SOURCE_BITS_DIR, '$SOURCE_BITS_DIR');
 
 		/*
-		 * bits-dir uses a directory layout that mirrors our Manta uploads.
+		 * bits-dir uses a directory layout mirroring our Manta uploads.
 		 */
 		var bits_from_dir = mod_path.join(
 			process.env.SOURCE_BITS_DIR,
@@ -542,7 +542,9 @@ main()
 	});
 
 	lib_buildspec.load_build_specs(lib_common.root_path('build.spec'),
-	    lib_common.root_path('build.spec.local'), function (err, bs) {
+			lib_common.root_path('build.spec.local'),
+			lib_common.root_path('build.spec.branches'),
+			function (err, bs) {
 		if (err) {
 			console.error('ERROR: loading build specs: %s',
 			    err.stack);

@@ -9,6 +9,7 @@
 /upgrade-*.tgz
 /config/*.local
 /config/root.authorized_keys
+/build.spec.branches
 /build.spec.local
 /configure-branches
 /*.vmwarevm

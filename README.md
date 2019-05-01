@@ -315,16 +315,16 @@ boot tarball) and cnapi zone, the following could be used in
     }
     "files": {
         "platform": { "branch": "master" },
-        "platboot": { "branch": "master" }
+        "platboot": { "branch": "master" },
+        "platimages": { "branch": "master" }
     }
 }
 ```
 
-As a convenience, the build will first look for a file called
-`configure-branches` and will convert that to a `build.spec.local` file if
-one does not already exist. This allows users to supply simple `component`
-and `branch` data in an easier form. The above `build.spec.local` fragment
-would be written:
+As a convenience, the build will run `bin/convert-configure-branches.js` to
+convert `configure-branches` if it exists to a `build.spec.branches` file.
+This allows users to supply simple `component` and `branch` data in an simpler
+format. The above `build.spec.local` fragment would be written:
 
 ```
 bits-branch: release-20150514
@@ -332,26 +332,16 @@ cnapi: master
 platform: master
 ```
 
-Note here, that since the `platform`, `platimages` and `platboot` artifacts
-and the `agents` and `agents_md5` artifacts should always be matched. The tool
-which converts the `configure-branches` file will set the complementary values
+Note here, that since the `platform`, `platboot` and `platimages` artifacts
+and the `agents` and `agents_md5` artifacts should always be matched. The
+tool that writes `build.spec.local` will include complementary values
 automatically. Any keys that do not map directly to a component (for example,
 `bits-branch` in the above snippet) are taken as top-level keys for the
-`build.spec.local` file.
+`build.spec.branches` file assuming that they're valid `build.spec` keys.
 
-If more complicated `build.spec.local` content is required, for example the
-alternative build timestamp selection we discuss below, users should write a
-full `build.spec.local` file instead.
-
-If a `build.spec.local` file does not exist, then the build defaults to
-creating the following file:
-
-```
-{"bits-branches": "$(BRANCH)"}
-```
-
-where `$(BRANCH)` is the current branch of sdc-headnode.git that is being
-built.
+Note the build will load `build.spec`, `build.spec.local` and
+`build.spec.branches` in that order, and will **not** report conflicting
+values across `build.spec.*` files.
 
 #### Alternative build timestamp selection
 
