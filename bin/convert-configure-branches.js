@@ -31,16 +31,22 @@ var mod_path = require('path');
 function generate_options() {
     var options = [
         {
-            names: [ 'buildspec', 'f' ],
+            names: ['configure_branches', 'c'],
+            type: 'string',
+            help: 'input configure-branches file to load',
+            helpArg: 'configure-branches'
+        },
+        {
+            names: ['buildspec', 'f' ],
             type: 'string',
             help: 'input build.spec file to load',
-            helpArg: 'input'
+            helpArg: 'build.spec'
         },
         {
             names: ['buildspec_branches', 'w'],
             type: 'string',
             help: 'output build.spec.branches file to write',
-            helpArg: 'output'
+            helpArg: 'build.spec.branches'
         },
         {
             names: [ 'help', 'h' ],
@@ -89,6 +95,12 @@ function parse_opts(argv) {
 
     if (opts.help) {
         usage(0);
+    }
+    if (opts.configure_branches === undefined ||
+        opts.buildspec === undefined ||
+        opts.buildspec_branches === undefined) {
+            errprintf('error: -c, -f and -w options are required\n');
+            usage(0);
     }
 
     return (opts);
@@ -203,11 +215,11 @@ function main() {
         var known_files = Object.keys(bs_data.files);
         var out_buildspec = {};
 
-        mod_fs.readFile('configure-branches', 'utf-8',
+        mod_fs.readFile(opts.configure_branches, 'utf-8',
                 function read(rerr, data) {
             if (rerr) {
                 console.error(
-                    'Error reading configure-branches file: %s', rerr);
+                    'Error reading %s: %s', opts.configure_branches, rerr);
                 process.exit(3);
             }
             var vals = data.split('\n');

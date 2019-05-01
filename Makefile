@@ -266,7 +266,7 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 build-spec-branches:
 	if [ -f configure-branches ]; then \
 	    ./bin/convert-configure-branches.js \
-	        -f build.spec -w build.spec.branches; \
+	        -c configure-branches -f build.spec -w build.spec.branches; \
 	fi
 
 #
