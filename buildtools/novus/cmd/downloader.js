@@ -257,12 +257,12 @@ bit_enum_zone(be, next) {
 		/*
 		 * bits-dir uses a directory layout mirroring our Manta uploads.
 		 */
-		var bits_from_dir = mod_path.join(
-			process.env.SOURCE_BITS_DIR,
-			jobname, branch + '-latest', jobname);
-
 		mod_assert.string(
 			process.env.SOURCE_BITS_DIR, '$SOURCE_BITS_DIR');
+
+		 var bits_from_dir = mod_path.join(
+			process.env.SOURCE_BITS_DIR,
+			jobname, branch + '-latest', jobname);
 
 		bits = [];
 		lib_bits_from_dir(bits, {
