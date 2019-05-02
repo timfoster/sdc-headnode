@@ -272,18 +272,20 @@ build-spec-branches:
 #
 # Delete any failed image files that might be sitting around before building.
 # This is safe because only one headnode build runs at a time. Also cleanup any
-# unused lofi devices (used ones will just fail)
+# unused lofi devices (used ones will just fail) We look for the string
+# 'sdc-headnode-tmp', set by ./bin/build-*-image
 #
 .PHONY: clean-img-cruft
 clean-img-cruft:
 ifeq ($(shell uname -s),SunOS)
-	pfexec rm -vf /tmp/*4gb.img
-	for dev in $(shell lofiadm | cut -d ' ' -f1 | grep -v "^Block"); do  \
+	for dev in $(shell lofiadm | grep sdc-headnode-tmp | cut -d ' ' -f1 | \
+	        grep -v "^Block"); do  \
 	    mount | grep "on $${dev}" | cut -d' ' -f1 | while read mntpath; do \
 	        pfexec umount $${mntpath}; \
 	        done; \
 	    pfexec lofiadm -d $${dev}; \
 	done
+	pfexec rm -rf /tmp/sdc-headnode-tmp.*
 endif
 
 CLEAN_FILES += 0-npm-stamp

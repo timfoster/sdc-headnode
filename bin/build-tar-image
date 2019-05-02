@@ -110,13 +110,18 @@ function check_nodejs
 }
 
 MERGED_SPEC=
-if [[ -f "${ROOT}/build.spec" && -f "${ROOT}/build.spec.local" ]]; then
-    MERGED_SPEC=$(${JSONMERGE} ${ROOT}/build.spec ${ROOT}/build.spec.local)
-elif [[ -f "${ROOT}/build.spec" ]]; then
-    MERGED_SPEC=$(cat ${ROOT}/build.spec);
-elif [[ -f "${ROOT}/build.spec.local" ]]; then
-    MERGED_SPEC=$(cat ${ROOT}/build.spec.local)
+SPEC_SOURCES=""
+if [[ -f "${ROOT}/build.spec" ]]; then
+    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec"
 fi
+if [[ -f "${ROOT}/build.spec.local" ]]; then
+    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec.local"
+fi
+if [[ -f "${ROOT}/build.spec.branches" ]]; then
+    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec.branches"
+fi
+
+MERGED_SPEC=$(${JSONMERGE} ${SPEC_SOURCES})
 
 function build_spec
 {
