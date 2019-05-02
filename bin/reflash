@@ -504,7 +504,8 @@ load_build_spec()
 
     MERGED_SPEC=$(${ROOT}/bin/json-merge ${SPEC_SOURCES})
 
-    [[ -n ${MERGED_SPEC} ]] || fatal "Unable to load build.spec[.local|.branches]"
+    [[ -n ${MERGED_SPEC} ]] || \
+        fatal "Unable to load build.spec[.local|.branches]"
 }
 
 mget_stdout()

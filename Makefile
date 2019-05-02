@@ -544,7 +544,12 @@ publish: release-json
 	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP.tgz && \
 	echo "$$PUB_STAMP" > \
 	    $(ENGBLD_BITS_DIR)/$(NAME)/latest-build-stamp
-	cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME)
+	if [ -f build.spec.local ]; then \
+	    cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME); \
+	fi
+	if [ -f configure-branches ]; then \
+	    cp configure-branches $(ENGBLD_BITS_DIR)/$(NAME); \
+	fi
 	cp release.json $(ENGBLD_BITS_DIR)/$(NAME)
 
 ENGBLD_BITS_UPLOAD_OVERRIDE=true

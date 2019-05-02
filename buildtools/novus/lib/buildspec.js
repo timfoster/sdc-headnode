@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright 2015 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 var mod_fs = require('fs');
