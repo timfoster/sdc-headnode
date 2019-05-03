@@ -58,11 +58,11 @@ function generate_options() {
 }
 
 function errprintf() {
-	process.stderr.write(mod_extsprintf.sprintf.apply(null, arguments));
+    process.stderr.write(mod_extsprintf.sprintf.apply(null, arguments));
 }
 
 function printf() {
-	process.stdout.write(mod_extsprintf.sprintf.apply(null, arguments));
+    process.stdout.write(mod_extsprintf.sprintf.apply(null, arguments));
 }
 
 function parse_opts(argv) {
@@ -106,7 +106,9 @@ function parse_opts(argv) {
     return (opts);
 }
 
-function process_line(line) {
+function process_line(line, lineno) {
+
+    line = line.trim();
     if (line.length === 0) {
         return;
     }
@@ -121,22 +123,22 @@ function process_line(line) {
     var colon_index = line.indexOf(':');
     if (colon_index === line.length - 1 || colon_index === -1) {
         console.error(
-            'Expected key:val pair on line %s, got: %s', i + 1,
+            'Expected key:val pair on line %s, got: %s', lineno,
             line);
-        process.exit(3);
+        process.exit(1);
     }
     var key = line.slice(0, colon_index).trim();
     var val = line.slice(colon_index + 1, line.length).trim();
 
     if (key.length === 0 || val.length === 0) {
         console.error(
-            'Invalid key/val pair on line %s: %s', i + 1, line);
-        process.exit(3);
+            'Invalid key/val pair on line %s: %s', lineno, line);
+        process.exit(1);
     }
-    return {'key': key, 'val': val};
+    return ({'key': key, 'val': val});
 }
 
-function process_zones_entry(buildspec, key, val, lineno, line) {
+function process_zones_entry(buildspec, key, val, lineno) {
     if (buildspec.zones === undefined) {
         buildspec.zones = {};
     }
@@ -145,13 +147,13 @@ function process_zones_entry(buildspec, key, val, lineno, line) {
     } else {
         console.log(buildspec.zones[key]);
         console.error(
-            'Duplicate key on line %s: %s', lineno, line);
-        process.exit(3);
+            'Duplicate key on line %s: %s', lineno, key);
+        process.exit(1);
     }
 }
 
 function process_files_entry(
-        buildspec, key, val, lineno, line, seen_file_branches) {
+        buildspec, key, val, lineno, seen_file_branches) {
 
     // some files components should have the same branch set
     // if any appear in the configure-branches file. Define
@@ -167,8 +169,8 @@ function process_files_entry(
     }
     if (seen_file_branches.indexOf(key) !== -1) {
         console.error(
-            'Error: duplicate key on line %s: %s', lineno, line);
-        process.exit(3);
+            'Error: duplicate key on line %s: %s', lineno, key);
+        process.exit(1);
     } else {
         seen_file_branches.push(key);
         buildspec.files[key] = {'branch': val};
@@ -192,7 +194,7 @@ function process_files_entry(
                         'Error: values across %s must be identical. ' +
                         'See line %s: %s',
                         same_list.join(', '), lineno, key);
-                    process.exit(3);
+                    process.exit(1);
                 } else {
                     buildspec.files[comp] = {'branch': val};
                 }
@@ -201,68 +203,48 @@ function process_files_entry(
     }
 }
 
-function main() {
-    var opts = parse_opts();
+var opts = parse_opts();
 
-    mod_fs.readFile(opts.buildspec, 'utf-8', function readbs(err, bs_file) {
-        if (err) {
-            console.error('Error loading build.spec file: %s', err);
-            process.exit(3);
+try {
+    var bs_file = mod_fs.readFileSync(opts.buildspec, 'utf-8');
+
+    var bs_data = JSON.parse(bs_file);
+    var known_zones = Object.keys(bs_data.zones);
+    var known_files = Object.keys(bs_data.files);
+    var out_buildspec = {};
+
+    var data = mod_fs.readFileSync(opts.configure_branches, 'utf-8');
+
+    var vals = data.split('\n');
+    var seen_file_branches = [];
+
+    for (var i = 0 ; i < vals.length; i++) {
+        var lineno = i + 1;
+        var kv = process_line(vals[i], lineno);
+        if (kv === undefined) {
+            continue;
         }
 
-        var bs_data = JSON.parse(bs_file);
-        var known_zones = Object.keys(bs_data.zones);
-        var known_files = Object.keys(bs_data.files);
-        var out_buildspec = {};
-
-        mod_fs.readFile(opts.configure_branches, 'utf-8',
-                function read(rerr, data) {
-            if (rerr) {
+        // Determine whether we have 'zones', 'files' or other keys.
+        if (known_zones.lastIndexOf(kv.key) > -1) {
+            process_zones_entry(out_buildspec, kv.key, kv.val, lineno);
+        } else if (known_files.lastIndexOf(kv.key) > -1) {
+            process_files_entry(
+                out_buildspec, kv.key, kv.val, lineno, seen_file_branches);
+        } else {
+            if (bs_data[kv.key] === undefined) {
                 console.error(
-                    'Error reading %s: %s', opts.configure_branches, rerr);
-                process.exit(3);
+                    'Unknown build.spec key in configure-branches ' +
+                    'file, line %s: %s', lineno, kv.key);
+                process.exit(1);
             }
-            var vals = data.split('\n');
-            var seen_file_branches = [];
-
-            for (var i= 0 ; i < vals.length; i++) {
-                var line = vals[i].trim();
-                var lineno = i + 1;
-                var kv = process_line(line);
-                if (kv === undefined) {
-                    continue;
-                }
-
-                // Determine whether we have 'zones', 'files' or other keys.
-                if (known_zones.lastIndexOf(kv.key) > -1) {
-                    process_zones_entry(
-                        out_buildspec, kv.key, kv.val, lineno, line);
-                } else if (known_files.lastIndexOf(kv.key) > -1) {
-                    process_files_entry(
-                        out_buildspec, kv.key, kv.val, lineno, line,
-                        seen_file_branches);
-                } else {
-                    if (bs_data[kv.key] === undefined) {
-                        console.error(
-                            'Unknown build.spec key in configure-branches ' +
-                            'file, line %s: %s', lineno, kv.key);
-                        process.exit(3);
-                    }
-                    out_buildspec[kv.key] = kv.val;
-                }
-            }
-            mod_fs.writeFile(
-                    opts.buildspec_branches,
-                    JSON.stringify(out_buildspec, null, 4),
-                    'utf-8',
-                    function write(werr) {
-                        if (werr) {
-                            return console.error('error writing file: ', werr);
-                        }
-                    }
-                );
-        });
-    });
+            out_buildspec[kv.key] = kv.val;
+        }
+    }
+    mod_fs.writeFileSync(opts.buildspec_branches,
+        JSON.stringify(out_buildspec, null, 4),
+        'utf-8');
+} catch (err) {
+    console.error('Error converting configure-branches: %s', err);
+    process.exit(1);
 }
-
-main();

@@ -244,11 +244,8 @@ feature(name)
 };
 
 module.exports = {
-	load_build_specs: function (
-			base_file, optional_file, optional_branch_file, cb) {
+	load_build_specs: function (base_file, cb) {
 		mod_assert.string(base_file, 'base_file');
-		mod_assert.string(optional_file, 'optional_file');
-		mod_assert.string(optional_branch_file, 'optional_branch_file');
 		mod_assert.func(cb, 'cb');
 
 		var bs = new BuildSpec();
@@ -259,8 +256,6 @@ module.exports = {
 			},
 			inputs: [
 				{ optional: false, path: base_file },
-				{ optional: true, path: optional_file },
-				{ optional: true, path: optional_branch_file }
 			]
 		}, function (err) {
 			if (err) {

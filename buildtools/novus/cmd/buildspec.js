@@ -113,9 +113,7 @@ main()
 	var opts = parse_opts(process.argv);
 
 	lib_buildspec.load_build_specs(
-			lib_common.root_path('build.spec'),
-			lib_common.root_path('build.spec.local'),
-			lib_common.root_path('build.spec.branches'),
+			lib_common.root_path('build.spec.merged'),
 			function (err, bs) {
 		if (err) {
 			console.error('ERROR loading build specs: %s',

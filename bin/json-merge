@@ -10,11 +10,11 @@
  */
 
 /*
- * This tool takes an list of json files and prints out a merged
- * version of the files with the right-most files on the command line
- * taking precedence.
+ * This tool takes an output file, and a list of input files and writes
+ * a version of the files with the right-most files on the command line
+ * taking precedence. We use very
  *
- * ./json-merge orig.json [newer.json newest.json ... ]
+ * ./json-merge output.json [orig.json newer.json newest.json ... ]
  */
 
 var fs = require('fs');
@@ -50,10 +50,13 @@ var merge = (function(){
     };
 }());
 
-function get_json_payload(input_files) {
+function get_json_payload(output_file, input_files) {
     var merge_params = [true];
-
-    for (var j = 0; j < input_files.length; j++) {
+    for (var j = 1; j < input_files.length; j++) {
+        if (!fs.existsSync(input_files[j])) {
+            console.error('Skipping missing file %s.', input_files[j]);
+            continue;
+        }
         var file_content = fs.readFileSync(input_files[j], 'utf8');
         var js_obj = JSON.parse(file_content);
         if (js_obj === '') {
@@ -64,8 +67,8 @@ function get_json_payload(input_files) {
     }
 
     var combined_obj = merge.apply(merge, merge_params);
-    console.log(JSON.stringify(combined_obj));
+    fs.writeFileSync(output_file, JSON.stringify(combined_obj));
 }
 
-get_json_payload(process.argv.slice(2, process.argv.length));
+get_json_payload(process.argv[2], process.argv.slice(2, process.argv.length));
 

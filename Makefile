@@ -252,6 +252,12 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 	touch $@
 
 #
+# Empty rules for these files so that even if they don't exist, we're
+# still able to make build.spec.merged.
+#
+configure-branches build.spec.local:
+
+#
 # Primarily a convenience for developers, we convert a simple
 # 'configure-branches' file into a 'build.spec.branches' file if a
 # configure-branches file is present. This allows developers to declare which
@@ -262,12 +268,16 @@ check:: $(ESLINT_TARGET) check-jsl check-json $(JSSTYLE_TARGET) check-bash \
 # <key> <colon> <value>
 # <hash comment> [any text]
 #
-.PHONY: build-spec-branches
-build-spec-branches:
+build.spec.branches: configure-branches build.spec
 	if [ -f configure-branches ]; then \
 	    ./bin/convert-configure-branches.js \
 	        -c configure-branches -f build.spec -w build.spec.branches; \
+	    cat build.spec.branches; \
 	fi
+
+build.spec.merged: build.spec build.spec.local build.spec.branches
+	rm -f $@
+	bin/json-merge $@ $^
 
 #
 # Delete any failed image files that might be sitting around before building.
@@ -291,7 +301,7 @@ endif
 CLEAN_FILES += 0-npm-stamp
 
 .PHONY: deps
-deps: 0-npm-stamp clean-img-cruft build-spec-branches
+deps: 0-npm-stamp clean-img-cruft build.spec.merged
 
 .PHONY: coal
 coal: deps download $(TOOLS_DEPS)
@@ -380,7 +390,8 @@ gz-tools: $(TOOLS_DEPS)
 CLEAN_FILES += build/gz-tools *.tgz \
 	$(GZ_TOOLS_MANIFEST) \
 	release.json \
-	build.spec.branches
+	build.spec.branches \
+	build.spec.merged
 
 #
 # Tools tarball
@@ -544,12 +555,7 @@ publish: release-json
 	    $(ENGBLD_BITS_DIR)/$(NAME)/usb$(HEADNODE_VARIANT_SUFFIX)-$$PUB_STAMP.tgz && \
 	echo "$$PUB_STAMP" > \
 	    $(ENGBLD_BITS_DIR)/$(NAME)/latest-build-stamp
-	if [ -f build.spec.local ]; then \
-	    cp build.spec.local $(ENGBLD_BITS_DIR)/$(NAME); \
-	fi
-	if [ -f configure-branches ]; then \
-	    cp configure-branches $(ENGBLD_BITS_DIR)/$(NAME); \
-	fi
+	json < build.spec.merged > $(ENGBLD_BITS_DIR)/$(NAME)/build.spec.merged
 	cp release.json $(ENGBLD_BITS_DIR)/$(NAME)
 
 ENGBLD_BITS_UPLOAD_OVERRIDE=true
@@ -575,7 +581,7 @@ bits-upload: build-spec-branches publish $(BUILDIMAGE_TARG)
 	    -t $$PUB_STAMP
 
 .PHONY: bits-upload-latest
-bits-upload-latest: build-spec-branches
+bits-upload-latest: build.spec.merged
 	BRANCH_STAMP=$(BRANCH)$$(./bin/unique-branches $(BRANCH)); \
 	$(TOP)/deps/eng/tools/bits-upload.sh \
 	    -b $$BRANCH_STAMP \

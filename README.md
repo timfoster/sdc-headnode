@@ -339,9 +339,9 @@ automatically. Any keys that do not map directly to a component (for example,
 `bits-branch` in the above snippet) are taken as top-level keys for the
 `build.spec.branches` file assuming that they're valid `build.spec` keys.
 
-Note the build will load `build.spec`, `build.spec.local` and
-`build.spec.branches` in that order, and will **not** report conflicting
-values across `build.spec.*` files.
+Note the build will merge `build.spec`, `build.spec.local` and
+`build.spec.branches` in that order into a file called `build.spec.merged`
+and will **not** report conflicting values across `build.spec.*` files.
 
 #### Alternative build timestamp selection
 

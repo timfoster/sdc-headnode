@@ -11,6 +11,7 @@
 /config/root.authorized_keys
 /build.spec.branches
 /build.spec.local
+/build.spec.merged
 /configure-branches
 /*.vmwarevm
 /*.img

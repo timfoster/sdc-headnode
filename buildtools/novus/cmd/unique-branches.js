@@ -34,9 +34,9 @@ function main() {
 
     var headnode_branch = process.argv[2];
 
-    lib_buildspec.load_build_specs(lib_common.root_path('build.spec'),
-        lib_common.root_path('build.spec.local'),
-        lib_common.root_path('build.spec.branches'), function (err, bs) {
+    lib_buildspec.load_build_specs(
+            lib_common.root_path('build.spec.merged'),
+            function (err, bs) {
         if (err) {
             console.error('ERROR loading build specs: %s', err.stack);
             process.exit(3);

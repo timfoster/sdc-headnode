@@ -68,25 +68,6 @@ exec > >(tee ${LOGFILE}) 2>&1
 
 . "${ROOT}/buildtools/lib/trace_logger.sh"
 
-MERGED_SPEC=
-SPEC_SOURCES=""
-if [[ -f "${ROOT}/build.spec" ]]; then
-    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec"
-fi
-if [[ -f "${ROOT}/build.spec.local" ]]; then
-    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec.local"
-fi
-if [[ -f "${ROOT}/build.spec.branches" ]]; then
-    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec.branches"
-fi
-
-MERGED_SPEC=$(${ROOT}/bin/json-merge ${SPEC_SOURCES})
-
-function build_spec () {
-    local thing=$1;
-    echo $(echo $MERGED_SPEC | ${ROOT}/bin/json ${thing});
-};
-
 BUILD_TGZ=$(build_spec build-tgz)
 USB_SIZE="4gb"
 USB_SKIP=7812500

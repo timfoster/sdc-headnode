@@ -83,25 +83,6 @@ export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}
 export BASH_XTRACEFD=4
 set -o xtrace
 
-MERGED_SPEC=
-SPEC_SOURCES=""
-if [[ -f "${ROOT}/build.spec" ]]; then
-    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec"
-fi
-if [[ -f "${ROOT}/build.spec.local" ]]; then
-    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec.local"
-fi
-if [[ -f "${ROOT}/build.spec.branches" ]]; then
-    SPEC_SOURCES="$SPEC_SOURCES ${ROOT}/build.spec.branches"
-fi
-
-MERGED_SPEC=$(${ROOT}/bin/json-merge ${SPEC_SOURCES})
-
-function build_spec () {
-    local thing=$1;
-    echo $(echo $MERGED_SPEC | ${ROOT}/bin/json ${thing});
-};
-
 echo ">> Starting build at $(date)"
 
 function fatal
