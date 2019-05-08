@@ -126,10 +126,9 @@ file: zones and files.
 ##### Zones
 
 The Triton headnode installation media includes images of various core zones.
-These zone images are generally built by [Mountain Gorilla (MG)][mg], and the
-resultant build artefacts are uploaded to a directory structure in
-[Manta][manta].  Zone images are nominated for inclusion in the build via
-the `"zones"` key in `build.spec`.
+These zone images are are uploaded to a directory structure in [Manta][manta].
+Zone images are nominated for inclusion in the build via the `"zones"` key
+in `build.spec`.
 
 The simplest possible example is a zone where the MG build artefact name is the
 same as the shipping filename, and the latest image is to be downloaded from

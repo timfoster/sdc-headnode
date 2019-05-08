@@ -12,7 +12,6 @@
 var mod_fs = require('fs');
 
 var mod_assert = require('assert-plus');
-var mod_vasync = require('vasync');
 var mod_verror = require('verror');
 
 var VError = mod_verror.VError;
@@ -244,26 +243,18 @@ feature(name)
 };
 
 module.exports = {
-	load_build_specs: function (base_file, cb) {
+	load_build_spec: function (base_file, cb) {
 		mod_assert.string(base_file, 'base_file');
 		mod_assert.func(cb, 'cb');
 
 		var bs = new BuildSpec();
 
-		mod_vasync.forEachPipeline({
-			func: function (_, next) {
-				bs.load_file(_.path, _.optional, next);
-			},
-			inputs: [
-				{ optional: false, path: base_file },
-			]
-		}, function (err) {
+		bs.load_file(base_file, false, function run_cb(err) {
 			if (err) {
 				cb(new VError(err, 'failed to load build ' +
-				    'specs'));
+				    'spec'));
 				return;
 			}
-
 			cb(null, bs);
 		});
 	}
