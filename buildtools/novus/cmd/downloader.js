@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 var mod_fs = require('fs');
@@ -541,11 +541,11 @@ main()
 		progbar: !opts.no_progbar
 	});
 
-	lib_buildspec.load_build_specs(
+	lib_buildspec.load_build_spec(
 			lib_common.root_path('build.spec.merged'),
 			function (err, bs) {
 		if (err) {
-			console.error('ERROR: loading build specs: %s',
+			console.error('ERROR: loading build spec: %s',
 			    err.stack);
 			process.exit(3);
 		}
