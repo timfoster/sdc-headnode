@@ -249,13 +249,8 @@ module.exports = {
 
 		var bs = new BuildSpec();
 
-		bs.load_file(base_file, false, function run_cb(err) {
-			if (err) {
-				cb(new VError(err, 'failed to load build ' +
-				    'spec'));
-				return;
-			}
-			cb(null, bs);
+		bs.load_file(base_file, false, function (err) {
+			cb(err, bs);
 		});
 	}
 };
